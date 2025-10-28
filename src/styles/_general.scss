@@ -1,0 +1,71 @@
+@use '_variables';
+
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: variables.$font-family;
+  line-height: 1.5;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  transition: background-image 0.4s ease-in-out;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: linear-gradient(variables.$bg-overlay, variables.$bg-overlay);
+}
+
+.app__header {
+  padding: 1rem 1.25rem;
+}
+
+.app__title {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(28px, 6vw, 64px);
+  color: rgb(230, 97, 62);
+  text-align: center;
+  letter-spacing: 0.02em;
+  text-shadow: 1px 1px 2px rgb(0, 255, 0);
+}
+
+.app__main {
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.controls {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(6px);
+  border-radius: variables.$radius;
+  box-shadow: variables.$shadow;
+  padding: 1.25rem;
+}
+
+.volume {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-block: clamp(8px, 2vw, 18px);
+}
+
+#volume {
+  width: clamp(180px, 28vw, 320px);
+}

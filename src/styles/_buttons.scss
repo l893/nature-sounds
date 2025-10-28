@@ -1,0 +1,63 @@
+.buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(16px, 6vw, 48px);
+  padding-block: clamp(8px, 2vw, 16px);
+  flex-wrap: wrap;
+}
+
+.btn {
+  position: relative;
+  width: clamp(180px, 24vw, 260px);
+  aspect-ratio: 1 / 1;
+  border: 0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  background: center / cover no-repeat var(--thumb, transparent);
+  box-shadow: 0 1.5rem 4.375rem rgba(0, 0, 0, 0.35);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.2s ease,
+    outline-color 0.2s ease;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(0.5px);
+}
+
+.icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgb(255, 255, 255);
+  font-size: clamp(36px, 5vw, 56px);
+  text-shadow: 0 0.1875rem 0.625rem rgba(0, 0, 0, 0.55);
+  z-index: 1;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease-in-out 0s;
+}
+
+.btn.is-active {
+  outline: 0.25rem solid rgba(255, 255, 255, 0.6);
+  outline-offset: 0;
+}
+
+.btn__label {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.625rem;
+  z-index: 1;
+  color: rgb(255, 255, 255);
+  font-weight: 700;
+  text-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.55);
+}
