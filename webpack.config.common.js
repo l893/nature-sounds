@@ -6,14 +6,14 @@ const postcssPresetEnv = require('postcss-preset-env');
 
 module.exports = {
   context: path.resolve(__dirname, 'src'),
-  entry: './index.js',
+  entry: './index.ts',
   output: {
     filename: '[name].[contenthash].js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
   },
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.ts', '.js'],
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -33,6 +33,15 @@ module.exports = {
   ],
   module: {
     rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader',
+          },
+        ],
+      },
       {
         test: /\.css$/i,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
@@ -56,14 +65,17 @@ module.exports = {
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
         type: 'asset/resource',
+        generator: { filename: 'assets/images/[name].[contenthash][ext]' },
       },
       {
         test: /\.(mp3|wav|ogg)$/i,
         type: 'asset/resource',
+        generator: { filename: 'assets/audio/[name][ext]' },
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
+        generator: { filename: 'assets/fonts/[name][ext]' },
       },
     ],
   },
