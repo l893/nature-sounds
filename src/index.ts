@@ -1,83 +1,104 @@
 import './styles/custom.scss';
 
-import rainyBg from './assets/images/rainy-bg.jpg';
-import summerBg from './assets/images/summer-bg.jpg';
-import winterBg from './assets/images/winter-bg.jpg';
+import rainyBackground from './assets/images/rainy-bg.jpg';
+import summerBackground from './assets/images/summer-bg.jpg';
+import winterBackground from './assets/images/winter-bg.jpg';
 
-import rainMp3 from './assets/audio/rain.mp3';
-import summerMp3 from './assets/audio/summer.mp3';
-import winterMp3 from './assets/audio/winter.mp3';
+import rainAudio from './assets/audio/rain.mp3';
+import summerAudio from './assets/audio/summer.mp3';
+import winterAudio from './assets/audio/winter.mp3';
 
-import { SoundPlayer, type SceneKey } from './ts/player';
-import { mountButtons, setActiveButton, type ButtonSpec } from './ts/dom';
+import { SoundPlayer } from './ts/player';
+import { mountWeatherButtons, setActiveWeatherButton } from './ts/dom';
+import type { SceneKey, ButtonSpec } from './ts/models/scene';
+import type { ActiveButtonState } from './components/WeatherButton/types';
 
 const VOLUME_INPUT_ID = 'volume';
 const BUTTONS_ROOT_ID = 'buttons';
 
 const sounds: Record<SceneKey, string> = {
-  rain: rainMp3,
-  summer: summerMp3,
-  winter: winterMp3,
+  rain: rainAudio,
+  summer: summerAudio,
+  winter: winterAudio,
 };
 
 const backgrounds: Record<SceneKey, string> = {
-  rain: rainyBg,
-  summer: summerBg,
-  winter: winterBg,
+  rain: rainyBackground,
+  summer: summerBackground,
+  winter: winterBackground,
 };
 
 const buttons: ButtonSpec[] = [
-  { key: 'summer', iconClass: 'icon-sun', label: 'Summer', thumb: summerBg },
-  { key: 'rain', iconClass: 'icon-cloud-rain', label: 'Rain', thumb: rainyBg },
+  {
+    key: 'summer',
+    iconClass: 'icon-sun',
+    label: 'Summer',
+    thumb: summerBackground,
+  },
+  {
+    key: 'rain',
+    iconClass: 'icon-cloud-rain',
+    label: 'Rain',
+    thumb: rainyBackground,
+  },
   {
     key: 'winter',
     iconClass: 'icon-cloud-snow',
     label: 'Winter',
-    thumb: winterBg,
+    thumb: winterBackground,
   },
 ];
 
-function isSceneKey(x: string): x is SceneKey {
-  return x === 'rain' || x === 'summer' || x === 'winter';
+function isSceneKey(value: string): value is SceneKey {
+  return value === 'rain' || value === 'summer' || value === 'winter';
+}
+
+function handleStateChange(state: ActiveButtonState): void {
+  const buttonsRoot = document.getElementById(BUTTONS_ROOT_ID);
+  if (buttonsRoot instanceof HTMLElement) {
+    setActiveWeatherButton(buttonsRoot, state);
+  }
 }
 
 function main(): void {
-  const volumeEl = document.getElementById(VOLUME_INPUT_ID);
-  const btnRoot = document.getElementById(BUTTONS_ROOT_ID);
+  const volumeElement = document.getElementById(VOLUME_INPUT_ID);
+  const buttonsRoot = document.getElementById(BUTTONS_ROOT_ID);
 
   if (
-    !(volumeEl instanceof HTMLInputElement) ||
-    !(btnRoot instanceof HTMLElement)
+    !(volumeElement instanceof HTMLInputElement) ||
+    !(buttonsRoot instanceof HTMLElement)
   ) {
+    console.error('Required DOM elements not found');
     return;
   }
 
-  mountButtons(btnRoot, buttons);
+  mountWeatherButtons(buttonsRoot, buttons);
 
   const player = new SoundPlayer({
     sounds,
     backgrounds,
-    onStateChange: ({ key, playing }) => setActiveButton(btnRoot, key, playing),
+    onStateChange: handleStateChange,
   });
 
-  player.setVolume(volumeEl.value);
+  player.setVolume(volumeElement.value);
 
-  volumeEl.addEventListener('input', (e) => {
-    const t = e.target;
-    if (t instanceof HTMLInputElement) {
-      player.setVolume(t.value);
+  volumeElement.addEventListener('input', (event) => {
+    const target = event.target;
+    if (target instanceof HTMLInputElement) {
+      player.setVolume(target.value);
     }
   });
 
-  btnRoot.addEventListener('click', (e) => {
-    const target = e.target as Element | null;
-    const btn = target?.closest<HTMLButtonElement>('.btn');
-    if (!btn) return;
+  buttonsRoot.addEventListener('click', (event) => {
+    const target = event.target as Element | null;
+    const button = target?.closest<HTMLButtonElement>('.btn');
 
-    const dk = btn.dataset.key;
-    if (!dk || !isSceneKey(dk)) return;
+    if (!button) return;
 
-    player.play(dk);
+    const dataKey = button.dataset.key;
+    if (!dataKey || !isSceneKey(dataKey)) return;
+
+    player.play(dataKey);
   });
 
   document.body.style.backgroundImage = `url('${backgrounds.summer}')`;

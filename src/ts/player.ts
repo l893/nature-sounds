@@ -1,9 +1,9 @@
-export type SceneKey = 'rain' | 'summer' | 'winter';
+import type { SceneKey, SoundPlayerState } from './models/scene';
 
 export interface SoundPlayerOptions {
   sounds: Record<SceneKey, string>;
   backgrounds: Record<SceneKey, string>;
-  onStateChange?: (state: { key: SceneKey | null; playing: boolean }) => void;
+  onStateChange?: (state: SoundPlayerState) => void;
 }
 
 export class SoundPlayer {
@@ -11,13 +11,13 @@ export class SoundPlayer {
   private _currentKey: SceneKey | null = null;
   private _isPlaying = false;
 
-  constructor(private readonly opts: SoundPlayerOptions) {
+  constructor(private readonly options: SoundPlayerOptions) {
     this.audio.preload = 'auto';
     this.audio.loop = true;
 
     this.audio.addEventListener('ended', () => {
       this._isPlaying = false;
-      this.opts.onStateChange?.({ key: this._currentKey, playing: false });
+      this.options.onStateChange?.(this.getCurrentState());
     });
   }
 
@@ -29,23 +29,34 @@ export class SoundPlayer {
     return this._isPlaying;
   }
 
+  private getCurrentState(): SoundPlayerState {
+    return {
+      key: this._currentKey,
+      playing: this._isPlaying,
+    };
+  }
+
   setVolume(value: number | string): void {
-    const n = typeof value === 'string' ? parseFloat(value) : value;
-    const clamped = Number.isFinite(n) ? Math.min(Math.max(n, 0), 1) : 1;
-    this.audio.volume = clamped;
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    const clampedVolume = Number.isFinite(numericValue)
+      ? Math.min(Math.max(numericValue, 0), 1)
+      : 1;
+    this.audio.volume = clampedVolume;
   }
 
   private applyBackground(key: SceneKey): void {
-    const bg = this.opts.backgrounds[key];
-    if (bg) document.body.style.backgroundImage = `url('${bg}')`;
+    const background = this.options.backgrounds[key];
+    if (background) {
+      document.body.style.backgroundImage = `url('${background}')`;
+    }
   }
 
   play(key: SceneKey): void {
-    if (!this.opts.sounds[key]) return;
+    if (!this.options.sounds[key]) return;
 
     if (this._currentKey !== key) {
       this.audio.pause();
-      this.audio.src = this.opts.sounds[key];
+      this.audio.src = this.options.sounds[key];
       this._currentKey = key;
       this.applyBackground(key);
     }
@@ -53,16 +64,18 @@ export class SoundPlayer {
     if (!this.audio.paused) {
       this.audio.pause();
       this._isPlaying = false;
-      this.opts.onStateChange?.({ key, playing: false });
+      this.options.onStateChange?.(this.getCurrentState());
       return;
     }
 
-    void this.audio
+    this.audio
       .play()
       .then(() => {
         this._isPlaying = true;
-        this.opts.onStateChange?.({ key, playing: true });
+        this.options.onStateChange?.(this.getCurrentState());
       })
-      .catch((err) => console.error('Audio play error:', err));
+      .catch((error) => {
+        console.error('Audio play error:', error);
+      });
   }
 }
